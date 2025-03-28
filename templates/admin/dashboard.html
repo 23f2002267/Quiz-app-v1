@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1 style="color: brown;">Admin Dashboard </h1>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+    <form action="/search" method="POST">
+        <label for="q">Search:</label>
+        <input type="text" id="q" name="q" placeholder="Enter your query" required>
+    
+        <div class="dropdown">
+            <button type="button" class="dropdown-btn">Select Filters</button>
+            <div class="dropdown-content">
+                <label>
+                    <input type="checkbox" name="f" value="subject"> Subjects
+                </label>
+                <label>
+                    <input type="checkbox" name="f" value="chapter"> Chapters
+                </label>
+                <label>
+                    <input type="checkbox" name="f" value="quiz"> Quizzes
+                </label>
+                <label>
+                    <input type="checkbox" name="f" value="question"> Questions
+                </label>
+                <label>
+                    <input type="checkbox" name="f" value="user"> Users
+                </label>
+            </div>
+        </div>
+    
+        <button type="submit">Search</button>
+    </form>
+    
+    <h2 style="color: brown;">Subjects Available</h2>
+    <br>
+    <a href="{{ url_for('admin.create_subject') }}">ADD SUBJECT</a>
+    {% if not subjects %}
+    <p>No exsisting entries</p>
+    {% else %}
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subject in subjects %}
+            <tr>
+                <td>{{ subject.id }}</td>
+                <td>{{ subject.name }}</td>
+                <td>{{ subject.description }}</td>
+                <td> <a href="/{{subject['id']}}/chapters" type="button">View Chapters</a></td>
+                <td> <a href="/{{subject['id']}}/update" type="button">Update</a></td>
+                <td> <a href="/{{subject['id']}}/delete" type="button">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            <ul>
+            {% for category, message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+
+</body>
+</html>

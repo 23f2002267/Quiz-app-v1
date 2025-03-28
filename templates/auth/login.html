@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Quiz Master Login</title>
+    <style>
+        /* General body styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Title container styling */
+        .title-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title-container .welcome {
+            font-size: 20px; /* Normal font size for "Welcome to" */
+            color: #4a4eb1;
+            margin: 0;
+        }
+
+        .title-container .quiz-master {
+            font-size: 50px; /* Large font size for "Quiz Master" */
+            font-weight: bold;
+            color: #4a4eb1;
+            margin: 0;
+        }
+
+        /* Login box styling */
+        .login-box {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 300px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 90%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #4a4eb1;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .register-link {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .register-link a {
+            color: #4a4eb1;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Section -->
+    <div class="title-container">
+        <p class="welcome">Welcome to</p>
+        <p class="quiz-master">Quiz Master</p>
+    </div>
+
+    <!-- Login Box -->
+    <div class="login-box">
+        <form method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <button type="submit">Login</button>
+        </form>
+        <div class="register-link">
+            Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a>
+        </div>
+    </div>
+</body>
+</html>
