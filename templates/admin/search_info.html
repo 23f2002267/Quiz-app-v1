@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Details</title>
+    <style>
+        /* General styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #4a4eb1;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .back-link:hover {
+            background-color: #3a3e91;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a4eb1;
+        }
+
+        .details {
+            margin: 20px 0;
+        }
+
+        .details p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .details p strong {
+            color: #4a4eb1;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .actions a {
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+
+        .delete {
+            background-color: #f44336;
+        }
+
+        .delete:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Go Back Button -->
+        <a href="javascript:history.back()" class="back-link">Go Back</a>
+    
+        <!-- Object Title -->
+        <h1>{{ table_n | capitalize }} Details</h1>
+
+        <!-- Object Details Section -->
+        <div class="details">
+            {% for column in col %}
+                <p><strong>{{ column | capitalize }}:</strong> {{ obj[0][loop.index0] }}</p>
+            {% endfor %}
+        </div>
+
+        <!-- Actions Section -->
+        <div class="actions">
+            <a href="/{{ table_n }}/{{ obj[0][0] }}/0/delete" class="delete">Delete</a>
+        </div>
+    </div>
+</body>
+</html>

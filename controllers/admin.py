@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user, AnonymousUserMixin
-from models import Subject, Chapter, Quiz, Question, db
+from models import User, Subject, Chapter, Quiz, Question, db
 from datetime import datetime
 from sqlalchemy import text
 
@@ -17,6 +17,31 @@ def op_check(csv, v):
         if v == i :
             return True
     return False
+def sql_query(tablename, column, querry):
+    sql = text(f"""
+            SELECT fts_{tablename}.rowid, fts_{tablename}.{column},
+                   snippet(fts_{tablename}, 0, '<mark>', '</mark>', '...', 64) as snippet
+            FROM fts_{tablename}
+            WHERE fts_{tablename}.{column} MATCH :query
+            ORDER BY bm25(fts_{tablename})
+        """)
+    return db.session.execute(sql, {'query': f'"{querry}"*'}).fetchall()
+def sql_obj_querry(tablename, query):
+    sql = text(f"""
+            SELECT *
+            FROM {tablename}
+            WHERE {tablename}.id = {query}
+        """)
+    return db.session.execute(sql).fetchall()
+
+searchable = {"subject":"name", "chapter":"name", "quiz":"questions",
+               "question":"q_statement", "user":"username"}
+columns = {"subject":["id", "name", "description"],
+           "chapter":["id", "subject_id", "name", "description"],
+           "quiz":["id", "chapter_id", "time_duration", "questions", "remarks"],
+           "question":["id", "chapter_id", "q_statement", "options", "correct_option"],
+           "user":["id", "username", "fullname", "qualification", "dob", "is_admin", "is_active"]}
+
 
 @admin.before_request
 @login_required
@@ -51,6 +76,12 @@ def quesiton(su_id,ch_id,quiz_id,q_ids):
     print(questions)
     return render_template('admin/questions.html', questions=questions, ques_ids=q_ids,
                            quiz_id=quiz_id, subject_id=su_id, chapter_id=ch_id)
+
+@admin.route('/dashboard/users')
+@login_required
+def users():
+    users = User.query.all()
+    return render_template('admin/user.html', users=users)
 
 @admin.route('/subject/create', methods=['GET','POST'])
 @login_required
@@ -189,13 +220,18 @@ def delete_question(su_id, ch_id, ques_id):
 @admin.route('/<int:su_id>/<int:ch_id>/<int:quiz_id>/<int:ques_id>/del_ques', methods=['GET','POST'])
 @login_required
 def delete_quiz_question(su_id, ch_id, quiz_id, ques_id):
-    subs = Quiz.query.filter_by(id=quiz_id).first()
-    if subs :
-        lis = (subs.questions).split(',')
-        lis.remove(str(ques_id))
-        Lis = list_to_text(lis)
-        subs.questions = Lis
-        db.session.commit()
+    try:
+        subs = Quiz.query.filter_by(id=quiz_id).first()
+        if subs :
+            lis = (subs.questions).split(',')
+            lis.remove(str(ques_id))
+            Lis = list_to_text(lis)
+            subs.questions = Lis
+            db.session.commit()
+    except:
+        db.session.rollback()
+        flash('Cannot delte, already exsisting quiz')       
+        return redirect(f'/{su_id}/{ch_id}/{quiz_id}/{subs.questions}/questions')
     return redirect(f'/{su_id}/{ch_id}/{quiz_id}/{Lis}/questions')
 
 @admin.route('/<int:su_id>/update', methods=['GET','POST'])
@@ -251,8 +287,8 @@ def update_quiz(su_id,ch_id,quiz_id):
         selected_questions = list_to_text(selected_questions)
         remarks = request.form['remarks']
         if selected_questions:
-            quizt.update({"time_duration":time_duration,"questions":selected_questions,"remarks":remarks})
             try:
+                quizt.update({"time_duration":time_duration,"questions":selected_questions,"remarks":remarks})
                 db.session.commit()
                 flag = True
             except:
@@ -296,19 +332,43 @@ def update_question(su_id,ch_id,quiz_id,ques_ids,ques_id):
                            object="Quiz ID :", id=quiz_id,
                            quest=ques)
 
+@admin.route('/<string:table>/<int:id>', methods=['GET', 'POST'])
+@login_required
+def serach_info(table, id):
+    if request.method == 'GET':
+        obj = sql_obj_querry(table, id)
+        return render_template('admin/search_info.html', obj=obj, col=columns[table], table_n=table)
+    return url_for(request.referrer)    
+
+@admin.route('/<string:table>/<int:id>/<int:ind>/delete')
+@login_required
+def del_info(table,id,ind):
+    if not table != "user" or id != 1: 
+        try :
+            db.session.execute(text(f"""DELETE FROM {table} WHERE id={id}"""))
+            db.session.commit()
+        except:
+            db.session.rollback()
+            flash('Cannot delete, already exsisting quiz')
+    if ind == 1:
+        return redirect(request.referrer)
+    else:
+        return redirect(url_for('admin.dashboard'))
+
 @admin.route('/search', methods=['GET','POST'])
 @login_required
 def search():
     if request.method == 'POST':
-        fts_query = f'"{request.form['q']}"*'
-        sql = text("""
-            SELECT fts_subject.rowid, fts_subject.name,
-                   snippet(fts_subject, 0, '<mark>', '</mark>', '...', 64) as snippet
-            FROM fts_subject
-            WHERE fts_subject.name MATCH :query
-            ORDER BY bm25(fts_subject)
-        """)
-        results = db.session.execute(sql, {'query': fts_query}).fetchall()
-        flash(f"{results}")
-        return render_template('admin/dashboard.html', subjects=results)
-    return redirect(url_for('admin.dashboard'))
+        fts_query = request.form['q']
+        fts_filter = request.form.getlist('f')
+        print(fts_filter)
+        if fts_filter == []:
+            search_results = {"Subject": sql_query("subject", "name", fts_query),
+                            "Chapter": sql_query("chapter", "name", fts_query),
+                            "Quize": sql_query("quiz", "remarks", fts_query),
+                            "Question": sql_query("question", "q_statement", fts_query),
+                            "User": sql_query("user", "username", fts_query)}
+        else:
+            search_results = {table: sql_query(table, searchable[table], fts_query) for table in fts_filter}
+        return render_template('admin/search.html', search_results=search_results)
+    return redirect(request.referrer)

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{func}} Question</title>
+    <style>
+        /* General styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+        /* Title bar styling */
+        .title-bar {
+            background-color: #4a4eb1;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-bar span {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logout a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #333;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .logout a:hover {
+            background-color: #3a3e91;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #4a4eb1;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #4a4eb1;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus {
+            border: 1px solid #4a4eb1;
+            outline: none;
+            box-shadow: 0px 0px 3px rgba(74, 78, 177, 0.5);
+        }
+
+        button[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4a4eb1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #3a3e91;
+        }
+
+        .action-btn {
+            text-decoration: none;
+            padding: 10px 15px;
+            background-color: #4a4eb1;
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            background-color: #3a3e91;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        ul li {
+            margin: 5px 0;
+            color: #4a4eb1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Bar -->
+    <div class="title-bar">
+        <span>Admin Dashboard</span>
+        <div class="logout">
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+    </div>
+
+    <!-- Container -->
+    <div class="container">
+        <h2>{{func}} Question for Chapter {{chapter_id}}</h2>
+        <form method="POST">
+            <label for="q_statement">Question Statement:</label>
+            <input type="text" id="q_statement" name="q_statement" value="{{quest.q_statement}}" required>
+
+            <label for="options">Options (comma-separated):</label>
+            <input type="text" id="options" name="options" placeholder="Option1, Option2, Option3, Option4"
+            value="{{quest.options}}" required>
+
+            <label for="correct_option">Correct Option:</label>
+            <input type="text" id="correct_option" name="correct_option"
+            placeholder="Must match one of the options above" value="{{quest.correct_option}}" required>
+
+            <button type="submit">Update Question</button>
+        </form>
+        <p>
+            Go back to <a href="/{{ subject_id }}/{{ chapter_id }}/create_quizes" class="action-btn">Quiz Creation</a>
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+        <ul>
+            {% for category, message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>
