@@ -43,10 +43,11 @@ def register():
         db.session.add(user)
         try:
             db.session.commit()
+            return redirect(url_for('auth.login'))
         except:
             db.session.rollback()
-            
-        return redirect(url_for('auth.login'))
+            flash('Username already exists.')
+            return redirect(url_for('auth.register'))
     return render_template('auth/register.html')
 
 @auth.route('/logout')
