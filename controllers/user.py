@@ -1,15 +1,14 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
-from models import Subject, Quiz, Score, Chapter, Question
+from models import Subject, Quiz, Score, Chapter, Question, db
 
 user = Blueprint('user', __name__)
-global answers
-global questions
+
 @user.before_request
 @login_required
 def check_user():
     # Allow access to certain routes without redirection
-    allowed_routes = ['user.user_dashboard', 'user.chapter','user.quiz', 'user.quiz_attempt']
+    allowed_routes = ['user.user_dashboard', 'user.chapter','user.quiz', 'user.quiz_attempt', 'user.user_history']
     if request.endpoint in allowed_routes:
         return None
 
@@ -23,6 +22,15 @@ def user_dashboard():
     user = current_user.username
     subjects = Subject.query.all()
     return render_template('user/dashboard.html', subjects=subjects, user=user)
+
+@user.route('/quiz_history')
+@login_required
+def user_history():
+    user = current_user.username
+    user_id = current_user.id
+    hist = Score.query.filter_by(user_id=user_id).all()
+    return render_template('user/history.html', hist=hist, user=user)
+
 
 @user.route('/user/<int:su_id>/chapters')
 @login_required
@@ -46,47 +54,41 @@ def quiz(ch_id):
 @login_required
 def quiz_attempt(q_id):
     user_id = current_user.id
+    elem = Quiz.query.filter_by(id=q_id).first()
+    time = elem.time_duration
+    time = time.hour*3600 + time.minute*60 + time.second # Convert time to seconds
+    if elem:
+        quest = elem.questions.split(',')
+        answers = {} # List to store correct answers
+        questions = {} # Dictionary to store questions and options
 
-    if q_id != 0 and request.method == 'GET':
-        elem = Quiz.query.filter_by(id=q_id).first()
-        if elem:
-            quest = elem.questions.split(',')
-            answers = []  # List to store correct answers
-            questions = {}  # Dictionary to store questions and options
+        for ques_id in quest:
+            quest = Question.query.filter_by(id=ques_id).all()
+            for question in quest:
+                questions[question.q_statement] = question.options.split(',')
+                answers[question.q_statement] = question.correct_option
 
-            for ques_id in quest:
-                quest = Question.query.filter_by(id=ques_id).all()
-                for question in quest:
-                    questions[question.q_statement] = question.options.split(',')
-                    answers.append(question.correct_option)  # Appending correct answer in sequence
-            
-            print(questions)
-            print('????????????????????????????????????????????????????????????????????')
-            return render_template('user/quiz_attempt.html', questions=questions, user_id=user_id)
+        if request.method == 'GET':
+                return render_template('user/quiz_attempt.html', questions=questions, user_id=user_id,
+                                       time_duration=time)
 
-    elif request.method == 'POST':
-        submitted_answers = {}  # Dictionary to store user-submitted answers
-        for key, value in request.form.items():
-            submitted_answers[key] = value  # Storing question as key and selected answer as value
+        if request.method == 'POST':
+            submitted_answers = {}  # Dictionary to store user-submitted answers
+            for key, value in request.form.items():
+                submitted_answers[key] = value  # Storing question as key and selected answer as value
 
-        print('############################################################')
-        print("User Submitted Answers:", submitted_answers)
-
-        # Create a dictionary of correct answers mapped to questions
-        correct_answers = dict(zip(questions.keys(), answers))  
-
-        # Evaluate the score
-        score = sum(1 for q, a in submitted_answers.items() if correct_answers.get(q) == a)
-
-        print(f"User Score: {score}/{len(questions)}")
-
-        # Pass the data to the score template
-        # return render_template(
-        #     'user/score.html',
-        #     submitted=submitted_answers,
-        #     correct_answers=correct_answers,
-        #     score=score,
-        #     total=len(questions)
-# )        
-        return redirect(url_for('user.user_dashboard'))
+            corr=0
+            total=0
+            total_score=0
+            for key, value in answers.items():
+                total+=1
+                if submitted_answers.get(key) :
+                    if submitted_answers[key] == value:
+                        corr+=1
+            if corr !=0:
+                total_score = (corr/total)*100
+            db.session.add(Score(user_id=user_id, quiz_id=q_id, total_score=total_score))
+            db.session.commit()
+            return render_template('user/score.html', corr=corr, total=total, answers=answers,
+                            submitted_answers=submitted_answers, questions=questions)
 
