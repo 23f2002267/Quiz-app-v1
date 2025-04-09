@@ -8,7 +8,8 @@ user = Blueprint('user', __name__)
 @login_required
 def check_user():
     # Allow access to certain routes without redirection
-    allowed_routes = ['user.user_dashboard', 'user.chapter','user.quiz', 'user.quiz_attempt', 'user.user_history']
+    allowed_routes = ['user.user_dashboard', 'user.chapter','user.quiz', 'user.quiz_attempt',
+                       'user.user_history', 'user.user_profile', 'user.user_summary']
     if request.endpoint in allowed_routes:
         return None
 
@@ -19,14 +20,20 @@ def check_user():
 @user.route('/user_dashboard')
 @login_required
 def user_dashboard():
-    user = current_user.username
+    user = current_user.fullname
     subjects = Subject.query.all()
     return render_template('user/dashboard.html', subjects=subjects, user=user)
+
+@user.route('/profile')
+@login_required
+def user_profile():
+    user = current_user
+    return render_template('user/profile.html', user=user)
 
 @user.route('/quiz_history')
 @login_required
 def user_history():
-    user = current_user.username
+    user = current_user.fullname
     user_id = current_user.id
     hist = Score.query.filter_by(user_id=user_id).all()
     return render_template('user/history.html', hist=hist, user=user)
@@ -35,20 +42,22 @@ def user_history():
 @user.route('/user/<int:su_id>/chapters')
 @login_required
 def chapter(su_id):
+    user = current_user.fullname
     if su_id != 0:
         chap = Chapter.query.filter_by(subject_id=su_id).all()
         if chap:
-            return render_template('user/chapters.html', chap = chap, su_id = su_id)
-        return render_template('user/chapters.html', chap = chap, su_id = su_id)
+            return render_template('user/chapters.html', chap = chap, su_id = su_id, user=user)
+        return render_template('user/chapters.html', chap = chap, su_id = su_id, user=user)
 
 @user.route('/<int:ch_id>/quizes')
 @login_required
 def quiz(ch_id):
+    user = current_user.fullname
     if ch_id != 0:
         elem = Quiz.query.filter_by(chapter_id=ch_id).all()
         if elem:
-            return render_template('user/quiz.html', elem = elem, ch_id = ch_id)
-        return render_template('user/quiz.html', elem = elem, ch_id = ch_id)
+            return render_template('user/quiz.html', elem = elem, ch_id = ch_id, user=user)
+        return render_template('user/quiz.html', elem = elem, ch_id = ch_id, user=user)
 
 @user.route('/<int:q_id>/attempt', methods=['GET', 'POST'])
 @login_required
@@ -91,4 +100,3 @@ def quiz_attempt(q_id):
             db.session.commit()
             return render_template('user/score.html', corr=corr, total=total, answers=answers,
                             submitted_answers=submitted_answers, questions=questions)
-

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Score</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .score-container {
+            max-width: 800px;
+            margin: auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h2 {
+            color: #4a4eb1;
+            text-align: center;
+        }
+        .result-summary {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .question {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .options {
+            margin-top: 10px;
+        }
+        .options label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+        .incorrect {
+            color: red;
+            font-weight: bold;
+        }
+        .navigation-btn{
+            padding: 10px 20px;
+            background-color: #4a4eb1;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="score-container">
+        <h2>Quiz Results</h2>
+        <div class="result-summary">
+            <p><strong>Total Questions:</strong> {{ total }}</p>
+            <p><strong>Correct Answers:</strong> {{ corr }}</p>
+        </div>
+        {% for question, options in questions.items() %}
+        <div class="question">
+            <p><strong>{{ question }}</strong></p>
+            <div class="options">
+                {% for option in options %}
+                    <label>
+                        <input type="radio" name="{{ question }}" value="{{ option }}" disabled
+                            {% if submitted_answers.get(question) == option %} checked {% endif %}>
+                        {{ option }}
+                        {% if submitted_answers.get(question) == option %}
+                            <span class="{% if answers.get(question) == option %}correct{% else %}incorrect{% endif %}">
+                                {% if answers.get(question) == option %}(Correct){% else %}(Your Choice){% endif %}
+                            </span>
+                        {% elif answers.get(question) == option %}
+                            <span class="correct">(Correct Answer)</span>
+                        {% endif %}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<button class="navigation-btn" onclick="window.location.href='/user_dashboard'">Home Page</button>
+<button class="navigation-btn" onclick="window.location.href='/quiz_history'">Quiz History</button>
+</body>
+</html>

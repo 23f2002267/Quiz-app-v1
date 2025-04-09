@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzes</title>
+    <style>
+        /* General styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+        /* Title bar styling */
+        .title-bar {
+            background-color: #4a4eb1;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-bar span {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logout a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #333;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .logout a:hover {
+            background-color: #3a3e91;
+        }
+
+        /* Navigation bar styling */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+            padding: 10px 0;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            background-color: #4a4eb1;
+        }
+
+        .container {
+            padding: 120px;
+        }
+
+        h2 {
+            color: brown;
+            text-align: center;
+        }
+
+        /* Scrollable container styling */
+        .scrollable {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4a4eb1;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr.hide {
+            display: none; /* Hides rows when filtered */
+        }
+
+        .action-btn {
+            background-color: #4a4eb1;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .action-btn:hover {
+            background-color: #3a3e91;
+        }
+
+        /* Search bar styling */
+        .search-container input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .search-container input[type="text"]:focus {
+            outline: none;
+            box-shadow: 0px 0px 3px rgba(74, 78, 177, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Bar -->
+    <div class="title-bar">
+        <p>{{ user }}</p>
+        <span>Quiz Master</span>
+        <div class="logout">
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="{{ url_for('user.user_dashboard') }}">Home</a>
+        <a href="/quiz_history">History</a>
+        <a href="#summary">Summary</a>
+        <a href="#profile">Profile</a>
+    </div>
+
+    <!-- Quizzes Content -->
+    <div class="container">
+        <h2>Quizzes for Chapter: {{ ch_id }}</h2>
+        <a href="javascript:history.back()" class="back-link">Back to Chapters</a>
+        {% if not elem %}
+            <p>No quizzes available for this chapter.</p>
+        {% else %}
+            <div class="search-container">
+                <!-- Search Bar -->
+                <input type="text" id="search" placeholder="Search by ID/Time/Remarks..." onkeyup="filterQuizzes()">
+            </div>
+            <div class="scrollable">
+                <!-- Table -->
+                <table id="quizzes-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Time</th>
+                            <th>Remarks</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for quiz in elem %}
+                        <tr>
+                            <td>{{ quiz.id }}</td>
+                            <td>{{ quiz.time_duration }}</td>
+                            <td>{{ quiz.remarks }}</td>
+                            <td><a href="/{{ quiz.id }}/attempt" class="action-btn">Attempt Quiz</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // JavaScript function to filter table rows based on search input
+        function filterQuizzes() {
+            const searchInput = document.getElementById('search').value.toLowerCase();
+            const table = document.getElementById('quizzes-table');
+            const rows = table.getElementsByTagName('tr'); // Get all rows in the table
+
+            // Loop through all table rows except the header
+            for (let i = 1; i < rows.length; i++) { // Skip the header row
+                const cells = rows[i].getElementsByTagName('td'); // Get cells in the row
+                let matchFound = false;
+
+                // Loop through each cell in the row
+                for (let cell of cells) {
+                    const cellText = cell.textContent || cell.innerText;
+                    if (cellText.toLowerCase().includes(searchInput)) {
+                        matchFound = true;
+                        break;
+                    }
+                }
+
+                // Show or hide the row based on the match
+                if (matchFound) {
+                    rows[i].classList.remove('hide'); // Show row
+                } else {
+                    rows[i].classList.add('hide'); // Hide row
+                }
+            }
+        }
+    </script>
+</body>
+</html>

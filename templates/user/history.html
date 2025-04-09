@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz History</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+        .title-bar {
+            background-color: #4a4eb1;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-bar span {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logout a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #333;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .logout a:hover {
+            background-color: #3a3e91;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+            padding: 10px 0;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            background-color: #4a4eb1;
+        }
+
+        .container {
+            padding: 120px;
+        }
+
+        h2 {
+            color: brown;
+            text-align: center;
+        }
+
+        .scrollable {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4a4eb1;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr.hide {
+            display: none; /* Hides rows when filtered */
+        }
+
+        .search-container input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .search-container input[type="text"]:focus {
+            outline: none;
+            box-shadow: 0px 0px 3px rgba(74, 78, 177, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Bar -->
+    <div class="title-bar">
+        <p>{{ user }}</p>
+        <span>Quiz History</span>
+        <div class="logout">
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="{{ url_for('user.user_dashboard') }}">Home</a>
+        <a href="/quiz_history">History</a>
+        <a href="#summary">Summary</a>
+        <a href="/profile">Profile</a>
+    </div>
+
+    <!-- History Content -->
+    <div class="container">
+        <h2>Your Quiz History</h2>
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Search by ID, Quiz ID, or Timestamp..." onkeyup="filterHistory()">
+        </div>
+        <div class="scrollable">
+            <table id="history-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Quiz ID</th>
+                        <th>Timestamp</th>
+                        <th>Total Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in hist %}
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.quiz_id }}</td>
+                        <td>{{ row.timestamp_of_attempt }}</td>
+                        <td>{{ row.total_score }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript function to filter table rows based on search input
+        function filterHistory() {
+            const searchInput = document.getElementById('search').value.toLowerCase();
+            const table = document.getElementById('history-table');
+            const rows = table.getElementsByTagName('tr'); // Get all rows in the table
+
+            // Loop through all table rows except the header
+            for (let i = 1; i < rows.length; i++) { // Skip the header row
+                const cells = rows[i].getElementsByTagName('td'); // Get cells in the row
+                let matchFound = false;
+
+                // Loop through each cell in the row
+                for (let cell of cells) {
+                    const cellText = cell.textContent || cell.innerText;
+                    if (cellText.toLowerCase().includes(searchInput)) {
+                        matchFound = true;
+                        break;
+                    }
+                }
+
+                // Show or hide the row based on the match
+                if (matchFound) {
+                    rows[i].classList.remove('hide'); // Show row
+                } else {
+                    rows[i].classList.add('hide'); // Hide row
+                }
+            }
+        }
+    </script>
+</body>
+</html>
