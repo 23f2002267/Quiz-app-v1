@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Quizzes</title>
+    <style>
+        /* General styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+        /* Title bar styling */
+        .title-bar {
+            background-color: #4a4eb1;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-bar span {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logout a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #333;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .logout a:hover {
+            background-color: #3a3e91;
+        }
+
+        /* Navigation bar styling */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+            padding: 10px 0;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            background-color: #4a4eb1;
+        }
+
+        .container {
+            padding: 120px;
+        }
+
+        h2 {
+            color: brown;
+            text-align: center;
+        }
+
+                        /* Search bar styling */
+                        .search-container {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+            margin-top: 10px;
+        }
+
+        .search-container form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0px 40px;
+        }
+
+        .search-container input[type="text"] {
+            padding: 8px;
+            font-size: 14px;
+            flex-grow: 1;
+        }
+
+        .search-container .dropdown {
+            position: relative;
+        }
+
+        .dropdown-btn {
+            background-color: #2a2b3b;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: inline-block;
+        }
+
+        .dropdown-content label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .action-btn {
+            background-color: #4a4eb1;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            background-color: #3a3e91;
+        }
+
+        /* Scrollable container styling */
+        .scrollable {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4a4eb1;
+            color: white;
+        }
+
+        /* Buttons for actions */
+        .action-btn {
+            background-color: #4a4eb1;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .action-btn:hover {
+            background-color: #3a3e91;
+        }
+
+        tr.hide {
+            display: none; /* Hides rows when filtered */
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Bar -->
+    <div class="title-bar">
+        <span>Admin Dashboard</span>
+        <div class="logout">
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="{{ url_for('admin.dashboard') }}">Home</a>
+        <a href="{{ url_for('admin.users') }}">Users</a>
+        <a href="#dashboard">Summary Page</a>
+    </div>
+
+    <!-- Search Bar with Filters -->
+    <div class="search-container container">
+        <form action="/search" method="POST">
+            <input type="text" id="q" name="q" placeholder="username/subject/chapter/quiz/question" required>
+            <div class="dropdown">
+                <button type="button" class="dropdown-btn">Filters</button>
+                <div class="dropdown-content">
+                    <label><input type="checkbox" name="f" value="subject"> Subjects</label>
+                    <label><input type="checkbox" name="f" value="chapter"> Chapters</label>
+                    <label><input type="checkbox" name="f" value="quiz"> Quizzes</label>
+                    <label><input type="checkbox" name="f" value="question"> Questions</label>
+                    <label><input type="checkbox" name="f" value="user"> Users</label>
+                </div>
+            </div>
+            <button type="submit" class="action-btn">Search</button>
+        </form>
+    </div>
+
+
+    <!-- Quizzes Section -->
+    <div class="container">
+        <h2>Quizzes Available</h2>
+        <a href="/{{subject_id}}/{{id}}/create_quizes" class="action-btn">ADD QUIZ</a>
+        <a href="/{{subject_id}}/chapters" class="action-btn">Go to Chapters</a>
+        <div class="scrollable">
+            <!-- Search Bar -->
+            <input type="text" id="search" placeholder="id/time/remarks" onkeyup="filterElems()">
+
+            <!-- Table -->
+            <table id="quizzes-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Time</th>
+                        <th>Remarks</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if not elems %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; font-style: italic; color: gray;">
+                            No existing quizzes for this chapter
+                        </td>
+                    </tr>
+                    {% else %}
+                    {% for quiz in elems %}
+                    <tr>
+                        <td>{{ quiz.id }}</td>
+                        <td>{{ quiz.time_duration }}</td>
+                        <td>{{ quiz.remarks }}</td>
+                        <td>
+                            <a href="/{{subject_id}}/{{id}}/{{quiz.id}}/{{quiz.questions}}/questions" class="action-btn">View Questions</a>
+                            <a href="/{{subject_id}}/{{id}}/{{quiz.id}}/update" class="action-btn">Update</a>
+                            <a href="/{{subject_id}}/{{id}}/{{quiz.id}}/delete_quiz" class="action-btn">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="container">
+        <ul>
+            {% for category, message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <script>
+        // JavaScript function to filter table rows
+        function filterElems() {
+            const searchInput = document.getElementById('search').value.toLowerCase();
+            const table = document.getElementById('quizzes-table'); // Correct table ID
+            const rows = table.getElementsByTagName('tr'); // Get all rows in the table
+
+            for (let i = 1; i < rows.length; i++) { // Skip the header row
+                const cells = rows[i].getElementsByTagName('td'); // Get cells in the row
+                let matchFound = false;
+
+                for (let cell of cells) {
+                    const cellText = cell.textContent || cell.innerText;
+                    if (cellText.toLowerCase().includes(searchInput)) {
+                        matchFound = true;
+                        break;
+                    }
+                }
+
+                rows[i].classList.toggle('hide', !matchFound); // Show or hide row
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+        .title-bar {
+            background-color: #4a4eb1;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-bar span {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logout a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #333;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .logout a:hover {
+            background-color: #3a3e91;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+            padding: 10px 0;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            background-color: #4a4eb1;
+        }
+
+        .container {
+            padding: 120px;
+            text-align: center;
+        }
+
+        h2 {
+            color: brown;
+            text-align: center;
+        }
+
+        .profile-card {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .profile-item {
+            margin: 10px 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .profile-item span {
+            font-weight: bold;
+            color: #4a4eb1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Bar -->
+    <div class="title-bar">
+        <p>{{ user.username }}</p>
+        <span>User Profile</span>
+        <div class="logout">
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="{{ url_for('user.user_dashboard') }}">Home</a>
+        <a href="/quiz_history">History</a>
+        <a href="#">Summary</a>
+        <a href="/profile" class="active">Profile</a>
+    </div>
+
+    <!-- Profile Content -->
+    <div class="container">
+        <h2>Your Profile</h2>
+        <div class="profile-card">
+            <div class="profile-item"><span>ID:</span> {{ user.id }}</div>
+            <div class="profile-item"><span>Username:</span> {{ user.username }}</div>
+            <div class="profile-item"><span>Full Name:</span> {{ user.fullname }}</div>
+            <div class="profile-item"><span>Qualification:</span> {{ user.qualification }}</div>
+            <div class="profile-item"><span>Date of Birth:</span> {{ user.dob }}</div>
+        </div>
+    </div>
+</body>
+</html>

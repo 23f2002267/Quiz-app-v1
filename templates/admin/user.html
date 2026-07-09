@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Users</title>
+    <style>
+        /* General styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+        /* Title bar styling */
+        .title-bar {
+            background-color: #4a4eb1;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-bar span {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logout a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #333;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .logout a:hover {
+            background-color: #3a3e91;
+        }
+
+        /* Navigation bar styling */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+            padding: 10px 0;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            background-color: #4a4eb1;
+        }
+
+        .container {
+            padding: 120px;
+        }
+
+        h2 {
+            color: brown;
+            text-align: center;
+        }
+
+                /* Search bar styling */
+                .search-container {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+            margin-top: 10px;
+        }
+
+        .search-container form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0px 40px;
+        }
+
+        .search-container input[type="text"] {
+            padding: 8px;
+            font-size: 14px;
+            flex-grow: 1;
+        }
+
+        .search-container .dropdown {
+            position: relative;
+        }
+
+        .dropdown-btn {
+            background-color: #2a2b3b;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: inline-block;
+        }
+
+        .dropdown-content label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .action-btn {
+            background-color: #4a4eb1;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            background-color: #3a3e91;
+        }
+
+        /* Scrollable container styling */
+        .scrollable {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4a4eb1;
+            color: white;
+        }
+
+        tr.hide {
+            display: none; /* Hides rows when filtered */
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .action-btn {
+            background-color: #4a4eb1;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .action-btn:hover {
+            background-color: #3a3e91;
+        }
+
+        .search-container input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .search-container input[type="text"]:focus {
+            outline: none;
+            box-shadow: 0px 0px 3px rgba(74, 78, 177, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Bar -->
+    <div class="title-bar">
+        <span>Admin Dashboard</span>
+        <div class="logout">
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="{{ url_for('admin.dashboard') }}">Home</a>
+        <a href="{{ url_for('admin.users') }}">Users</a>
+        <a href="#dashboard">Summary Page</a>
+    </div>
+
+    <!-- Search Bar with Filters -->
+    <div class="search-container container">
+        <form action="/search" method="POST">
+            <input type="text" id="q" name="q" placeholder="Enter your query" required>
+            <div class="dropdown">
+                <button type="button" class="dropdown-btn">Filters</button>
+                <div class="dropdown-content">
+                    <label><input type="checkbox" name="f" value="subject"> Subjects</label>
+                    <label><input type="checkbox" name="f" value="chapter"> Chapters</label>
+                    <label><input type="checkbox" name="f" value="quiz"> Quizzes</label>
+                    <label><input type="checkbox" name="f" value="question"> Questions</label>
+                    <label><input type="checkbox" name="f" value="user"> Users</label>
+                </div>
+            </div>
+            <button type="submit" class="action-btn">Search</button>
+        </form>
+    </div>
+
+
+    <!-- Users Section -->
+    <div class="container">
+        <h2>User List</h2>
+        <!-- <div class="search-container"> -->
+            <!-- Search Bar -->
+            <input type="text" id="search" placeholder="Search by ID/Username/Full Name/Qualification..." onkeyup="filterUsers()">
+        <!-- </div> -->
+        <div class="scrollable">
+            <!-- Table -->
+            <table id="users-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Qualification</th>
+                        <th>Date of Birth</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.fullname }}</td>
+                        <td>{{ user.qualification }}</td>
+                        <td>{{ user.dob }}</td>
+                        {% if not user.is_admin %}
+                        <td><a href="/user/{{user.id}}/1/delete" class="action-btn">Delete</a></td>
+                        {% else %}
+                        <td>-</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript function to filter table rows based on search input
+        function filterUsers() {
+            const searchInput = document.getElementById('search').value.toLowerCase();
+            const table = document.getElementById('users-table');
+            const rows = table.getElementsByTagName('tr'); // Get all rows in the table
+
+            // Loop through all table rows except the header
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+                const cells = rows[i].getElementsByTagName('td'); // Get cells in the row
+                let matchFound = false;
+
+                // Loop through each cell in the row
+                for (let cell of cells) {
+                    const cellText = cell.textContent || cell.innerText;
+                    if (cellText.toLowerCase().includes(searchInput)) {
+                        matchFound = true;
+                        break;
+                    }
+                }
+
+                // Show or hide the row based on the match
+                if (matchFound) {
+                    rows[i].classList.remove('hide'); // Show row
+                } else {
+                    rows[i].classList.add('hide'); // Hide row
+                }
+            }
+        }
+    </script>
+</body>
+</html>
